@@ -13,6 +13,7 @@ namespace SwimmingAcademy.Interfaces
         Task<IEnumerable<ActionNameDto>> SearchActionsAsync(PreTeamActionSearchRequest request);
         Task<SavePTeamTransResponse?> SavePTeamTransactionAsync(SavePteamTransRequest request);
         Task<ViewPossiblePteamResponse> ViewPossiblePteamAsync(long swimmerId);
+        Task<List<PTeamSummaryDto>> GetPTeamSummariesBySiteAsync(short site);
 
     }
 }

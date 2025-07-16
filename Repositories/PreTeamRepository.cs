@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SwimmingAcademy.Data;
 using SwimmingAcademy.DTOs;
@@ -410,6 +411,39 @@ namespace SwimmingAcademy.Repositories
                 _logger.LogError(ex, "Error fetching possible PTeam data for swimmer ID {SwimmerId}", swimmerId);
                 throw new Exception("An error occurred while retrieving pre-team data.");
             }
+        }
+        public async Task<List<PTeamSummaryDto>> GetPTeamSummariesBySiteAsync(short site)
+        {
+            var result = new List<PTeamSummaryDto>();
+
+            // Fix for CS1929: Replace the incorrect usage of _context.GetConnectionString with the correct way to retrieve the connection string from the DbContext.
+
+            using var connection = new SqlConnection(_context.Database.GetConnectionString());
+            using var command = new SqlCommand("dbo.Show_PTeam_Summary", connection)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+
+            command.Parameters.AddWithValue("@site", site);
+
+            await connection.OpenAsync();
+            using var reader = await command.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                var dto = new PTeamSummaryDto
+                {
+                    PTeamID = reader.GetInt32(reader.GetOrdinal("PTeamID")),
+                    CoachFullName = reader.GetString(reader.GetOrdinal("FullName")),
+                    PTeamLevel = reader.GetString(reader.GetOrdinal("PTeamLevel")),
+                    Dayes = reader.GetString(reader.GetOrdinal("Dayes")),
+                    FromTo = reader.GetString(reader.GetOrdinal("From / To"))
+                };
+
+                result.Add(dto);
+            }
+
+            return result;
         }
 
     }

@@ -163,6 +163,24 @@ namespace SwimmingAcademy.Controllers
                 });
             }
         }
+        [HttpGet("summary/{site}")]
+        public async Task<IActionResult> GetSummary(short site)
+        {
+            try
+            {
+                var result = await _repo.GetPTeamSummariesBySiteAsync(site);
+
+                if (result == null || !result.Any())
+                    return NotFound(new { message = "No PreTeam records found for this site." });
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to load PreTeam summary.");
+                return StatusCode(500, new { message = "Internal server error." });
+            }
+        }
 
     }
 }
